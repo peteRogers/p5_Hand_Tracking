@@ -1,4 +1,4 @@
-// p5.js 2.x + ml5.js 1.x rope physics
+// p5.js 2.x + ml5.js 1.x rope physics, using the Rope class from rope.js
 // A row of ropes hangs from the top of the screen to the bottom.
 // Move your index finger through them to push them around; they swing and settle.
 // The camera is used for hand tracking but never shown.
@@ -11,7 +11,6 @@ const FINGER_RADIUS = 300; // how far the finger reaches
 const FINGER_PUSH = 0.1;   // how strongly finger movement pushes the ropes
 
 let ropes = [];
-let segLen;
 
 let handPose;
 let video;
@@ -46,14 +45,16 @@ function windowResized() {
 // One rope every SPACING pixels across the screen, each pinned at the top
 function makeRopes() {
   ropes = [];
-  segLen = height / SEGMENTS;
   for (let x = SPACING / 2; x < width; x += SPACING) {
-    let rope = [];
-    for (let i = 0; i <= SEGMENTS; i++) {
-      let y = i * segLen;
-      rope.push({ x, y, px: x, py: y });
-    }
-    ropes.push(rope);
+    ropes.push(new Rope(x, 0, {
+      length: height,
+      segments: SEGMENTS,
+      gravity: GRAVITY,
+      damping: DAMPING,
+      stiffness: 3,
+      color: 0,
+      thickness: 20,
+    }));
   }
 }
 
@@ -62,21 +63,19 @@ function draw() {
 
   updateFingers();
 
-  for (let rope of ropes) {
-    updateRope(rope);
-  }
-
-  noFill();
-  stroke(0); // reset every frame: the fingertip dots below turn the stroke off
-  strokeWeight(20);
   for (let r = 0; r < ropes.length; r++) {
+    let rope = ropes[r];
+
+    // Points near a fingertip get dragged along with it
+    for (let f of fingers) {
+      rope.push(f.x, f.y, f.x - f.px, f.y - f.py, FINGER_RADIUS, FINGER_PUSH);
+    }
+    rope.update();
+
     // Colour shifts across the screen
     let t = r / max(ropes.length - 1, 1);
-    //stroke(lerpColor(color(80, 160, 255), color(255, 90, 180), t));
-    let rope = ropes[r];
-    beginShape();
-    for (let p of rope) splineVertex(p.x, p.y);
-    endShape();
+    //rope.color = lerpColor(color(80, 160, 255), color(255, 90, 180), t);
+    rope.draw();
   }
 
   // Show where each fingertip is, since the camera is hidden
@@ -104,50 +103,5 @@ function updateFingers() {
     f.py = f.y;
     f.x = lerp(f.x, x, 0.5);
     f.y = lerp(f.y, y, 0.5);
-  }
-}
-
-// Verlet rope: move each point by its momentum plus gravity and the fingers,
-// then pull neighbouring points back to the right distance apart.
-function updateRope(rope) {
-  for (let i = 1; i < rope.length; i++) {
-    let p = rope[i];
-    let vx = (p.x - p.px) * DAMPING;
-    let vy = (p.y - p.py) * DAMPING;
-    p.px = p.x;
-    p.py = p.y;
-    p.x += vx;
-    p.y += vy + GRAVITY;
-
-    // Points near a fingertip get dragged along with it, more strongly the closer they are
-    for (let f of fingers) {
-      let d = dist(p.x, p.y, f.x, f.y);
-      if (d < FINGER_RADIUS) {
-        let k = (1 - d / FINGER_RADIUS) * FINGER_PUSH;
-        p.x += (f.x - f.px) * k;
-        p.y += (f.y - f.py) * k;
-      }
-    }
-  }
-
-  // Top point stays pinned, so only the lower point moves for the first link
-  for (let n = 0; n < 3; n++) {
-    for (let i = 1; i < rope.length; i++) {
-      let a = rope[i - 1];
-      let b = rope[i];
-      let dx = b.x - a.x;
-      let dy = b.y - a.y;
-      let d = max(sqrt(dx * dx + dy * dy), 0.001);
-      let diff = (d - segLen) / d;
-      if (i === 1) {
-        b.x -= dx * diff;
-        b.y -= dy * diff;
-      } else {
-        a.x += dx * diff * 0.5;
-        a.y += dy * diff * 0.5;
-        b.x -= dx * diff * 0.5;
-        b.y -= dy * diff * 0.5;
-      }
-    }
   }
 }

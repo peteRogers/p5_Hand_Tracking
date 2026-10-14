@@ -6,10 +6,10 @@ let video;
 let hands = [];
 
 async function setup() {
-  createCanvas(640, 480);
+  createCanvas(1280, 720);
 
   video = createCapture(VIDEO, { flipped: true });
-  video.size(640, 480);
+  video.size(1280, 720);
   video.hide();
 
   // In p5 2.x there is no preload(), so await the model in setup()
