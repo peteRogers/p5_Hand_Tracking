@@ -1,12 +1,6 @@
-# Ropes
+# The Rope class
 
 Ropes that swing and hang, made with [p5.js](https://p5js.org/) 2.x. All the rope code lives in one `Rope` class in `rope.js`, so a sketch can make a rope in one line.
-
-| File | What it does |
-| ---- | ------------ |
-| `rope.js` | The `Rope` class |
-| `rope_class.html` | Mouse demo: push a row of ropes, and hold the mouse button to grab the end of the red rope |
-| `ropes_hand.html` | Hand tracking demo: push the ropes with your index fingertip (uses [ml5.js](https://ml5js.org/)) |
 
 ## Quick start
 
@@ -129,8 +123,6 @@ Points closer to `x, y` get pushed harder. Pinned points never move. Call it bef
 rope.push(mouseX, mouseY, mouseX - pmouseX, mouseY - pmouseY, 120, 0.6);
 rope.update();
 ```
-
-`ropes_hand.js` does the same with the index fingertip of each hand instead of the mouse.
 
 ### Reading the points
 
