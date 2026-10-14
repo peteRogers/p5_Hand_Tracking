@@ -7,7 +7,17 @@ A shader is a small program that runs on the graphics card (GPU). It works out t
 | File | What it does |
 | ---- | ------------ |
 | `strands_simple.html` | The simplest example: makes the canvas wobble like it's under water. Move the mouse to change the strength |
+| `strands_chromatic.html` | Chromatic aberration: splits the red, green and blue apart like a cheap lens, more towards the edges. Move the mouse to change the strength |
+| `strands_lens.html` | Lens distortion: bends the picture like a camera lens. Mouse right bows lines outwards like a fisheye (barrel), mouse left bows them inwards (pincushion) |
+| `strands_glitch.html` | A heavy, pixelly glitch between two images. Mouse left shows one image, mouse right the other, and the glitching gets stronger towards the middle. Needs a local web server (see below) |
 | `strands_hand.html` | Hand tracking with [ml5.js](https://ml5js.org/): blue flames on your fingertips, or a magnifying lens you resize with a pinch |
+
+`strands_glitch.html` loads images, and browsers won't let a shader use images from a page opened straight from your files. Run it from a local web server instead, for example the Live Server extension in VS Code, or `python3 -m http.server` in this folder and then open `http://localhost:8000/strands_glitch.html`.
+
+Its images are public domain, from Wikimedia Commons:
+
+- `images/blue_marble.jpg`: [The Blue Marble](https://commons.wikimedia.org/wiki/File:The_Blue_Marble_(remastered).jpg), NASA / Apollo 17 crew, 1972
+- `images/pillars_of_creation.jpg`: [Pillars of Creation](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg), NASA, ESA and the Hubble Heritage Team, 2014
 
 ## How it works
 
@@ -51,7 +61,10 @@ The shader can't see your sketch's variables directly. To use one, wrap it in a 
 ```js
 let strength = uniformFloat(() => mouseX / width);    // one number
 let centre = uniformVec2(() => [mouseX, mouseY]);    // two numbers
+let photo = uniformTexture(() => myImage);           // an image, read with getTexture(photo, position)
 ```
+
+In p5 2.3.4, `uniformTexture` only works on a WEBGL canvas: `createCanvas(w, h, WEBGL)`. On a normal canvas it crashes with "Framebuffer is not defined".
 
 `millis()` works inside the shader on its own, so you can animate with time without a uniform.
 
