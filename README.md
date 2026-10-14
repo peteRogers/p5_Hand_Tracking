@@ -2,7 +2,7 @@
 
 Hand tracking sketches made with [p5.js](https://p5js.org/) 2.x and [ml5.js](https://ml5js.org/) 1.x.
 
-Open `index.html` to run the basic sketch, which labels every hand keypoint with its number. The other `.html` files are separate experiments, for example `labubu.html`.
+Open `index.html` to run the basic sketch, which labels every hand keypoint with its number. The other `.html` files are separate experiments, for example `labubu.html`. The `ropes` and `strands` folders hold more experiments, each with its own README.
 
 ## The model
 

@@ -106,27 +106,32 @@ class Rope {
       p.y += vy + this.gravity;
     }
 
-    // 2. Fix the sticks: pull each pair of neighbours back to the right distance.
-    // Pinned points don't move, so their free neighbour takes the whole correction.
-    let segLen = this.segLen;
+    // 2. Fix the sticks. Doing it a few times makes the rope less stretchy.
     for (let n = 0; n < this.stiffness; n++) {
-      for (let i = 0; i < this.points.length - 1; i++) {
-        let a = this.points[i];
-        let b = this.points[i + 1];
-        if (a.pinned && b.pinned) continue;
+      this.fixShape();
+    }
+  }
 
-        let dx = b.x - a.x;
-        let dy = b.y - a.y;
-        let d = max(sqrt(dx * dx + dy * dy), 0.001);
-        let error = (d - segLen) / d;
+  // Pull each pair of neighbours back to the right distance.
+  // Pinned points don't move, so their free neighbour takes the whole correction.
+  fixShape() {
+    let segLen = this.segLen;
+    for (let i = 0; i < this.points.length - 1; i++) {
+      let a = this.points[i];
+      let b = this.points[i + 1];
+      if (a.pinned && b.pinned) continue;
 
-        let aShare = a.pinned ? 0 : b.pinned ? 1 : 0.5;
-        let bShare = 1 - aShare;
-        a.x += dx * error * aShare;
-        a.y += dy * error * aShare;
-        b.x -= dx * error * bShare;
-        b.y -= dy * error * bShare;
-      }
+      let dx = b.x - a.x;
+      let dy = b.y - a.y;
+      let d = max(sqrt(dx * dx + dy * dy), 0.001);
+      let error = (d - segLen) / d;
+
+      let aShare = a.pinned ? 0 : b.pinned ? 1 : 0.5;
+      let bShare = 1 - aShare;
+      a.x += dx * error * aShare;
+      a.y += dy * error * aShare;
+      b.x -= dx * error * bShare;
+      b.y -= dy * error * bShare;
     }
   }
 
